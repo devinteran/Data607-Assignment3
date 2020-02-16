@@ -1,0 +1,148 @@
+---
+title: "Data 607 - Assignment3"
+author: "Devin Teran"
+date: "2/15/2020"
+output: html_document
+---
+##Overview: This assignment using regular expressions in R.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(stringr)
+```
+
+## Introduction
+
+
+## Problem 1:
+1. Using the 173 majors listed in fivethirtyeight.com’s College Majors dataset [https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/], provide code that identifies the majors that contain either "DATA" or "STATISTICS"
+```{r get_major_data_from_Git_Hub}
+git_hub_url <- 'https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv'
+major_data <- read_csv(git_hub_url)
+```
+
+```{r clean_major_data}
+colnames(major_data) <- c('Field_of_Degree_ID','Major','Major_Category')
+head(major_data)
+```
+
+```{r identify_data_or_science_majors}
+#Get list of majors from data
+majors <- major_data$Major
+grep(pattern = 'data|science',majors,value=TRUE,ignore.case=TRUE)
+```
+## Problem 2:
+Write code that transforms the data below:
+
+[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
+
+[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+
+[13] "olive"        "salal berry"
+
+Into a format like this:
+
+c("bell pepper", "bilberry", "blackberry", "blood orange", "blueberry", "cantaloupe", "chili pepper", "cloudberry", "elderberry", "lime", "lychee", "mulberry", "olive", "salal berry")
+
+```{r tranform_data_char_to_vector}
+food <- '[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
+
+[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+
+[13] "olive"        "salal berry"'
+food <- str_replace_all(food,"\\d+","")
+food <- str_replace_all(food,"\\n","")
+food <- str_replace_all(food,"[\\[\\]]","")
+food <- str_replace_all(food,"\\s+"," ")
+food <- str_replace_all(food,'[\"]',"'")
+food <- str_replace_all(food,"' '","','")
+food <- str_sub(food,2,str_length(food))
+food <- str_split(food,pattern=",")
+food <- unlist(food)
+food
+```
+## Problem 3:
+#3 Describe, in words, what these expressions will match:
+  
+***"(.)\1\1"***  
+This will return any character followed by the string \1\1.  
+Examples: "a\1\1","2\1\1"  
+```{r (.)\1\1}
+string1 <- "a\1\1"
+str_view(string1,"(.)\1\1")
+string2 <- "2\1\1"
+str_view(string2,"(.)\1\1")
+```
+  
+***"(..)\1"***  
+This will return any two characters following by the string \1.  
+Examples "8d\1", "ee\1"
+```{r (..)\1}
+string1 <- "8d\1"  
+str_view(string1,"(..)\1")  
+string2 <- "ee\1"  
+str_view(string2,"(..)\1")  
+```
+  
+***"(.).\\1.\\1"***  
+This will return any character, 
+followed by any character, 
+followed by the first character again, 
+follow by any character, 
+followed by the first character again.  
+The portion of the string that will match this regex, must have the same 1st, 3rd and 5th character.  
+```{r (.).\\1.\\1}
+string1 <- "abaDa"  
+str_view(string1,"(.).\\1.\\1")  
+string2 <- "YabadabaDoo"  
+str_view(string2,"(.).\\1.\\1")  
+```
+
+***"(.)(.)(.).*\\3\\2\\1"***   
+The first three characters can be anything,  
+followed by another character repeated n-number of times where n can be any number,   
+followed by the third character, the second character, and the first character.  
+```{r (.)(.)(.).*\\3\\2\\1}
+string1 <- "abcddddddddddddddddcba"
+str_view(string1,"(.)(.)(.).*\\3\\2\\1")
+string2 <- "xyzuzyx"
+str_view(string2,"(.)(.)(.).*\\3\\2\\1")
+```
+  
+#4 Construct regular expressions to match words that:
+Start and end with the same character.
+```{r start-end-same}
+test1 <- "deed"
+str_view(test1,"^(.).+\\1$")
+test2 <- "googling"
+str_view(test2,"^(.).+\\1$")
+```
+Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+```{r repeat_letters_beg_end}
+test1 <- "church"
+str_view(test1,"(..).+\\1")
+test2 <- "sheesh"
+str_view(test2,"(..).+\\1")
+```
+Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+```{r one-letter-three-times}
+test1 <- "melee"
+str_view(test1,"(.)(.+?\\1?)+")
+test2 <- "eleven"
+str_view(test2,"(.)(.+?\\1?)+")
+test3 <- "anacondas"
+str_view(test3,"(.)(.+?\\1?)+")
+test4 <- "telephone"
+str_view(test4,"(.)(.+?\\1?)+")
+test5 <- "googling"
+str_view(test5,"(.)(.+?\\1?)+")
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
